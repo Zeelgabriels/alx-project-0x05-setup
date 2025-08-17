@@ -9,24 +9,37 @@ const Home: React.FC = () => {
 
   const handleGenerateImage = async () => {
     setIsLoading(true);
-    const resp = await fetch('/api/generate-image', {
-      method: 'POST',
-      body: JSON.stringify({
-        prompt
-      }),
-      headers: {
-        'Content-type': 'application/json'
+    try {
+      const resp = await fetch('/api/generate-image', {
+        method: 'POST',
+        body: JSON.stringify({
+          prompt
+        }),
+        headers: {
+          'Content-type': 'application/json'
+        }
+      });
+
+      if (!resp.ok) {
+        console.error('Failed to generate image:', resp.statusText);
+        setIsLoading(false);
+        return;
       }
-    })
 
-
-    if (!resp.ok) {
-      setIsLoading(false)
-      return;
+      const data = await resp.json();
+      
+      // Set the image URL from the API response
+      if (data.imageUrl || data.url || data.image) {
+        setImageUrl(data.imageUrl || data.url || data.image);
+      } else {
+        console.error('No image URL in response:', data);
+      }
+      
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error generating image:', error);
+      setIsLoading(false);
     }
-
-    const data = await resp.json()
-    setIsLoading(false)
   };
 
   return (
